@@ -1,6 +1,6 @@
 {
     "name": "TickHandler",
-    "rootNamespace": "",
+    "rootNamespace": "TickHandler",
     "references": [
 	],
     "includePlatforms": [],
