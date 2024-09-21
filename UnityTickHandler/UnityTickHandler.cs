@@ -3,146 +3,173 @@ using System.Collections.Generic;
 
 namespace TickHandler.UnityTickHandler
 {
+/// <summary>
+/// Handles tick events by subscribing to an <see cref="IDispatcher"/> and managing listeners.
+/// </summary>
 public class UnityTickHandler : ITickHandler
 {
-    public event Action<float> FrameUpdate;
-    public event Action<float> FrameLateUpdate;
-    public event Action<float> EndFrameUpdate; 
-    public event Action<float> PhysicUpdate;
+	/// <inheritdoc/>
+	public event Action<float> FrameUpdate;
 
-    IDispatcher ITickHandler.Dispatcher => _dispatcher;
-    
-    private readonly IDispatcher _dispatcher;
-    private readonly List<Action<float>> _updateListeners;
-    private readonly List<Action<float>> _lateUpdateListeners;
-    private readonly List<Action<float>> _endFrameUpdateListeners;
-    private readonly List<Action<float>> _physicsListeners;
-    private readonly List<Action<float>> _lateUpdateOnceListeners;
-    
-    public UnityTickHandler(IDispatcher dispatcher, int listenersCapacity = 50)
-    {
-        _dispatcher = dispatcher;
-        _updateListeners = new List<Action<float>>(listenersCapacity);
-        _lateUpdateListeners = new List<Action<float>>(listenersCapacity);
-        _physicsListeners = new List<Action<float>>(listenersCapacity);
-        _lateUpdateOnceListeners = new List<Action<float>>(listenersCapacity);
-        _endFrameUpdateListeners = new List<Action<float>>(listenersCapacity);
-        
-        SubscribeOnDispatcherEvents();
-    }
-    
-    public void Dispose()
-    {
-        UnsubscribeOnDispatcherEvents();
-        
-        _updateListeners.Clear();
-        _lateUpdateListeners.Clear();
-        _physicsListeners.Clear();
-    }
+	/// <inheritdoc/>
+	public event Action<float> FrameLateUpdate;
 
-    public void SubscribeOnFrameUpdate(Action<float> listener)
-    {
-        _updateListeners.Add(listener);
-    }
+	/// <inheritdoc/>
+	public event Action<float> EndFrameUpdate;
 
-    public void SubscribeOnFrameLateUpdate(Action<float> listener)
-    {
-        _lateUpdateListeners.Add(listener);
-    }
+	/// <inheritdoc/>
+	public event Action<float> PhysicUpdate;
 
-    public void SubscribeOnPhysicUpdate(Action<float> listener)
-    {
-        _physicsListeners.Add(listener);
-    }
+	IDispatcher ITickHandler.Dispatcher => _dispatcher;
 
-    public void UnsubscribeOnFrameUpdate(Action<float> listener)
-    {
-        _updateListeners.Remove(listener);
-    }
+	private readonly IDispatcher _dispatcher;
+	private readonly List<Action<float>> _updateListeners;
+	private readonly List<Action<float>> _lateUpdateListeners;
+	private readonly List<Action<float>> _endFrameUpdateListeners;
+	private readonly List<Action<float>> _physicsListeners;
+	private readonly List<Action<float>> _lateUpdateOnceListeners;
 
-    public void UnsubscribeOnFrameLateUpdate(Action<float> listener)
-    {
-        _lateUpdateListeners.Remove(listener);
-    }
+	/// <summary>
+	/// Initializes a new instance of the <see cref="UnityTickHandler"/> class.
+	/// </summary>
+	/// <param name="dispatcher">The dispatcher to subscribe to.</param>
+	/// <param name="listenersCapacity">The initial capacity for listener lists.</param>
+	public UnityTickHandler(IDispatcher dispatcher, int listenersCapacity = 50)
+	{
+		_dispatcher = dispatcher;
+		_updateListeners = new List<Action<float>>(listenersCapacity);
+		_lateUpdateListeners = new List<Action<float>>(listenersCapacity);
+		_physicsListeners = new List<Action<float>>(listenersCapacity);
+		_lateUpdateOnceListeners = new List<Action<float>>(listenersCapacity);
+		_endFrameUpdateListeners = new List<Action<float>>(listenersCapacity);
 
-    public void UnsubscribeOnPhysicUpdate(Action<float> listener)
-    {
-        _physicsListeners.Remove(listener);
-    }
+		SubscribeOnDispatcherEvents();
+	}
 
-    public void SubscribeOnLateUpdateOnce(Action<float> listener)
-    {
-        _lateUpdateOnceListeners.Add(listener);
-    }
+	/// <inheritdoc/>
+	public void Dispose()
+	{
+		UnsubscribeOnDispatcherEvents();
 
-    public void SubscribeOnEndFrameUpdate(Action<float> listener)
-    {
-        _endFrameUpdateListeners.Add(listener);
-    }
+		_updateListeners.Clear();
+		_lateUpdateListeners.Clear();
+		_physicsListeners.Clear();
+		_lateUpdateOnceListeners.Clear();
+		_endFrameUpdateListeners.Clear();
+	}
 
-    public void UnsubscribeOnEndFrameUpdate(Action<float> listener)
-    {
-        _endFrameUpdateListeners.Remove(listener);
-    }
+	/// <inheritdoc/>
+	public void SubscribeOnFrameUpdate(Action<float> listener)
+	{
+		_updateListeners.Add(listener);
+	}
 
-    private void SubscribeOnDispatcherEvents()
-    {
-        _dispatcher.OnUpdate += OnDispatcherUpdateFrame;
-        _dispatcher.OnLateUpdate += OnDispatcherLateUpdateFrame;
-        _dispatcher.OnFixedUpdate += OnDispatcherPhysicsFrame;
-        _dispatcher.OnEndFrameUpdate += OnDispatcherEndFrameUpdate;
-    }
+	/// <inheritdoc/>
+	public void SubscribeOnFrameLateUpdate(Action<float> listener)
+	{
+		_lateUpdateListeners.Add(listener);
+	}
 
-    private void UnsubscribeOnDispatcherEvents()
-    {
-        _dispatcher.OnUpdate -= OnDispatcherUpdateFrame;
-        _dispatcher.OnLateUpdate -= OnDispatcherLateUpdateFrame;
-        _dispatcher.OnFixedUpdate -= OnDispatcherPhysicsFrame;
-        _dispatcher.OnEndFrameUpdate -= OnDispatcherEndFrameUpdate;
-    }
-    
-    private void OnDispatcherPhysicsFrame(float deltaTime)
-    {
-        PhysicUpdate?.Invoke(deltaTime);
-        foreach (var physicsListener in _physicsListeners)
-        {
-            physicsListener?.Invoke(deltaTime);
-        }
-    }
+	/// <inheritdoc/>
+	public void SubscribeOnPhysicUpdate(Action<float> listener)
+	{
+		_physicsListeners.Add(listener);
+	}
 
-    private void OnDispatcherUpdateFrame(float deltaTime)
-    {
-        FrameUpdate?.Invoke(deltaTime);
-        foreach (var updateListener in _updateListeners)
-        {
-            updateListener?.Invoke(deltaTime);
-        }
-    }
+	/// <inheritdoc/>
+	public void UnsubscribeOnFrameUpdate(Action<float> listener)
+	{
+		_updateListeners.Remove(listener);
+	}
 
-    private void OnDispatcherLateUpdateFrame(float deltaTime)
-    {
-        FrameLateUpdate?.Invoke(deltaTime);
-        foreach (var lateUpdateListener in _lateUpdateListeners)
-        {
-            lateUpdateListener?.Invoke(deltaTime);
-        }
-        
-        foreach (var lateUpdateOnceListener in _lateUpdateOnceListeners)
-        {
-            lateUpdateOnceListener?.Invoke(deltaTime);
-        }
-        
-        _lateUpdateListeners.Clear();
-    }
-    
-    private void OnDispatcherEndFrameUpdate(float deltaTime)
-    {
-        EndFrameUpdate?.Invoke(deltaTime);
+	/// <inheritdoc/>
+	public void UnsubscribeOnFrameLateUpdate(Action<float> listener)
+	{
+		_lateUpdateListeners.Remove(listener);
+	}
 
-        foreach (var endFrameUpdateListener in _endFrameUpdateListeners)
-        {
-            endFrameUpdateListener?.Invoke(deltaTime);
-        }
-    }
+	/// <inheritdoc/>
+	public void UnsubscribeOnPhysicUpdate(Action<float> listener)
+	{
+		_physicsListeners.Remove(listener);
+	}
+
+	/// <inheritdoc/>
+	public void SubscribeOnLateUpdateOnce(Action<float> listener)
+	{
+		_lateUpdateOnceListeners.Add(listener);
+	}
+
+	/// <inheritdoc/>
+	public void SubscribeOnEndFrameUpdate(Action<float> listener)
+	{
+		_endFrameUpdateListeners.Add(listener);
+	}
+
+	/// <inheritdoc/>
+	public void UnsubscribeOnEndFrameUpdate(Action<float> listener)
+	{
+		_endFrameUpdateListeners.Remove(listener);
+	}
+
+	private void SubscribeOnDispatcherEvents()
+	{
+		_dispatcher.OnUpdate += OnDispatcherUpdateFrame;
+		_dispatcher.OnLateUpdate += OnDispatcherLateUpdateFrame;
+		_dispatcher.OnFixedUpdate += OnDispatcherPhysicsFrame;
+		_dispatcher.OnEndFrameUpdate += OnDispatcherEndFrameUpdate;
+	}
+
+	private void UnsubscribeOnDispatcherEvents()
+	{
+		_dispatcher.OnUpdate -= OnDispatcherUpdateFrame;
+		_dispatcher.OnLateUpdate -= OnDispatcherLateUpdateFrame;
+		_dispatcher.OnFixedUpdate -= OnDispatcherPhysicsFrame;
+		_dispatcher.OnEndFrameUpdate -= OnDispatcherEndFrameUpdate;
+	}
+
+	private void OnDispatcherPhysicsFrame(float deltaTime)
+	{
+		PhysicUpdate?.Invoke(deltaTime);
+		foreach (var physicsListener in _physicsListeners)
+		{
+			physicsListener?.Invoke(deltaTime);
+		}
+	}
+
+	private void OnDispatcherUpdateFrame(float deltaTime)
+	{
+		FrameUpdate?.Invoke(deltaTime);
+		foreach (var updateListener in _updateListeners)
+		{
+			updateListener?.Invoke(deltaTime);
+		}
+	}
+
+	private void OnDispatcherLateUpdateFrame(float deltaTime)
+	{
+		FrameLateUpdate?.Invoke(deltaTime);
+		foreach (var lateUpdateListener in _lateUpdateListeners)
+		{
+			lateUpdateListener?.Invoke(deltaTime);
+		}
+
+		foreach (var lateUpdateOnceListener in _lateUpdateOnceListeners)
+		{
+			lateUpdateOnceListener?.Invoke(deltaTime);
+		}
+
+		_lateUpdateOnceListeners.Clear();
+	}
+
+	private void OnDispatcherEndFrameUpdate(float deltaTime)
+	{
+		EndFrameUpdate?.Invoke(deltaTime);
+
+		foreach (var endFrameUpdateListener in _endFrameUpdateListeners)
+		{
+			endFrameUpdateListener?.Invoke(deltaTime);
+		}
+	}
 }
 }
