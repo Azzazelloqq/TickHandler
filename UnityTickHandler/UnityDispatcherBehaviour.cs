@@ -9,25 +9,20 @@ namespace TickHandler.UnityTickHandler
 /// </summary>
 public class UnityDispatcherBehaviour : MonoBehaviour, IDispatcher
 {
-	/// <summary>
-	/// Occurs every frame during the Update phase.
-	/// </summary>
+	/// <inheritdoc/>
 	public event Action<float> OnUpdate;
 
-	/// <summary>
-	/// Occurs every frame during the LateUpdate phase.
-	/// </summary>
+	/// <inheritdoc/>
 	public event Action<float> OnLateUpdate;
 
-	/// <summary>
-	/// Occurs every physics frame during the FixedUpdate phase.
-	/// </summary>
+	/// <inheritdoc/>
 	public event Action<float> OnFixedUpdate;
 
-	/// <summary>
-	/// Occurs at the end of the LateUpdate phase.
-	/// </summary>
+	/// <inheritdoc/>
 	public event Action<float> OnEndFrameUpdate;
+
+	/// <inheritdoc/>
+	public float DeltaTime => Time.deltaTime;
 
 	private void Update()
 	{

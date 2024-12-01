@@ -19,6 +19,9 @@ public class UnityTickHandler : ITickHandler
 
 	/// <inheritdoc/>
 	public event Action<float> PhysicUpdate;
+	
+	/// <inheritdoc/>
+	public float DeltaTime => _dispatcher.DeltaTime;
 
 	IDispatcher ITickHandler.Dispatcher => _dispatcher;
 

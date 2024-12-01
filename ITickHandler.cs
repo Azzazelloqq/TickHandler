@@ -33,6 +33,11 @@ public interface ITickHandler : IDisposable
 	internal IDispatcher Dispatcher { get; }
 
 	/// <summary>
+	/// Gets the time in seconds it took to complete the last frame.
+	/// </summary>
+	float DeltaTime { get; }
+
+	/// <summary>
 	/// Subscribes a listener to the FrameUpdate event.
 	/// </summary>
 	/// <param name="listener">The listener to subscribe.</param>

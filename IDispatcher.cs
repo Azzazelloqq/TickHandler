@@ -26,5 +26,10 @@ public interface IDispatcher : IDisposable
 	/// Event that occurs at the end of the LateUpdate phase.
 	/// </summary>
 	event Action<float> OnEndFrameUpdate;
+
+	/// <summary>
+	/// Gets the time in seconds it took to complete the last frame.
+	/// </summary>
+	float DeltaTime { get; }
 }
 }
